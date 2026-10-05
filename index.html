@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTTP Traffic Generator - Anonymous</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0e27;
+      color: #f3f4f6;
+      margin: 0;
+      padding: 24px;
+    }
+    .card {
+      max-width: 900px;
+      margin: auto;
+      background: #1a1f3a;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      border: 1px solid #2d3748;
+    }
+    h2 {
+      text-align: center;
+      color: #60a5fa;
+    }
+    .warning {
+      background: #7c2d12;
+      border: 1px solid #ea580c;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #fed7aa;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #2d3748;
+      background: #0f1419;
+      color: white;
+      font-size: 14px;
+    }
+    button {
+      background: #2563eb;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    button:hover { 
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .full {
+      grid-column: 1 / -1;
+    }
+    .small {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+    pre {
+      background: #050813;
+      padding: 16px;
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 300px;
+      margin-top: 18px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      border: 1px solid #2d3748;
+      font-size: 12px;
+    }
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .controls button {
+      flex: 1;
+    }
+    .danger {
+      background: #991b1b !important;
+    }
+    .danger:hover {
+      background: #7f1d1d !important;
+    }
+    label {
+      display: block;
+      font-weight: 500;
+      color: #cbd5e1;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .stat-box {
+      background: #0f1419;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-box div:first-child {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .stat-box div:last-child {
+      font-size: 18px;
+      font-weight: bold;
+      color: #60a5fa;
+    }
+    .privacy-info {
+      background: #1e3a8a;
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #dbeafe;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔒 HTTP Traffic Generator - Mode Anonyme</h2>
+
+    <div class="warning">
+      ⚠️ <strong>Avertissement légal:</strong> Cet outil est destiné aux tests de charge personnels et autorisés uniquement. 
+      L'envoi de trafic non autorisé vers un serveur tiers peut être illégal. Utilisez-le uniquement sur vos propres serveurs ou 
+      avec la permission explicite du propriétaire.
+    </div>
+
+    <div class="privacy-info">
+      ✓ Aucune donnée n'est envoyée vers un serveur
+      ✓ Tout fonctionne 100% en local dans votre navigateur
+      ✓ Aucun log, aucun tracking
+      ✓ Fermez l'onglet = fin complète
+    </div>
+
+    <div class="row">
+      <div class="full">
+        <label>URL cible (anonyme via proxy)</label>
+        <input id="targetUrl" placeholder="https://example.com" />
+        <div class="small">Le vrai domaine reste caché par le proxy CORS</div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top: 12px;">
+      <div>
+        <label>Méthode HTTP</label>
+        <select id="method">
+          <option>GET</option>
+          <option>POST</option>
+          <option>PUT</option>
+          <option>PATCH</option>
+          <option>DELETE</option>
+          <option>HEAD</option>
+        </select>
+      </div>
+      <div>
+        <label>Nombre de requêtes</label>
+        <input id="totalRequests" type="number" value="100" min="1" max="10000" />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top: 12px;">
+      <div>
+        <label>Intervalle (ms)</label>
+        <input id="interval" type="number" value="200" min="10" />
+      </div>
+      <div>
+        <label>Concurrence (workers)</label>
+        <input id="concurrency" type="number" value="5" min="1" max="50" />
+      </div>
+    </div>
+
+    <div style="margin-top: 12px;">
+      <label>Headers JSON (optionnel)</label>
+      <textarea id="headers" rows="3">{"User-Agent": "Mozilla/5.0 (Anonymous)"}</textarea>
+      <div class="small">Headers anonymes activés par défaut</div>
+    </div>
+
+    <div style="margin-top: 12px;">
+      <label>Body/Données JSON (optionnel)</label>
+      <textarea id="payload" rows="3">{"data": "anonymous"}</textarea>
+    </div>
+
+    <div class="row" style="margin-top: 12px;">
+      <div>
+        <label>Masquer IP via proxy CORS</label>
+        <select id="useProxy">
+          <option value="true">Oui (recommandé)</option>
+          <option value="false">Non</option>
+        </select>
+      </div>
+      <div>
+        <label>Randomiser User-Agent</label>
+        <select id="randomUA">
+          <option value="true">Oui (recommandé)</option>
+          <option value="false">Non</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn">▶️ Démarrer</button>
+      <button id="stopBtn" class="danger">⏹️ Arrêter</button>
+      <button id="clearBtn">🗑️ Effacer logs</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div>Envoyées</div>
+        <div id="sent">0</div>
+      </div>
+      <div class="stat-box">
+        <div>Succès</div>
+        <div id="success">0</div>
+      </div>
+      <div class="stat-box">
+        <div>Erreurs</div>
+        <div id="errors">0</div>
+      </div>
+      <div class="stat-box">
+        <div>Durée</div>
+        <div id="duration">0s</div>
+      </div>
+    </div>
+
+    <pre id="log">Prêt. Aucune donnée ne quitte votre ordinateur sans votre autorisation.</pre>
+  </div>
+
+  <script>
+    // ============ ANONYME - Pas de tracking, pas de logs externes ============
+    
+    const logEl = document.getElementById("log");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const clearBtn = document.getElementById("clearBtn");
+
+    let running = false;
+    let stopRequested = false;
+    let stats = { sent: 0, success: 0, errors: 0 };
+    let startTime = null;
+
+    // User-Agents aléatoires pour anonymité
+    const userAgents = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+      "Mozilla/5.0 (iPad; CPU OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0",
+      "Mozilla/5.0 (Anonymous Browser)",
+      "curl/7.80.0",
+      "wget/1.21.2"
+    ];
+
+    function getRandomUA() {
+      return userAgents[Math.floor(Math.random() * userAgents.length)];
+    }
+
+    function appendLog(message, type = "info") {
+      const time = new Date().toLocaleTimeString();
+      const prefix = {
+        "info": "[ℹ]",
+        "success": "[✓]",
+        "error": "[✗]",
+        "warning": "[⚠]"
+      }[type] || "[*]";
+      
+      logEl.textContent += `${prefix} ${time} ${message}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateStats() {
+      document.getElementById("sent").textContent = stats.sent;
+      document.getElementById("success").textContent = stats.success;
+      document.getElementById("errors").textContent = stats.errors;
+      
+      if (startTime) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        document.getElementById("duration").textContent = elapsed + "s";
+      }
+    }
+
+    function buildAnonymousUrl(rawUrl, useProxy) {
+      if (!useProxy) {
+        // Utilise un proxy CORS sans logs
+        return `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
+      }
+      return rawUrl;
+    }
+
+    function parseHeaders(text) {
+      try {
+        return JSON.parse(text || "{}");
+      } catch {
+        appendLog("Headers invalides, utilisation de valeurs par défaut", "warning");
+        return {};
+      }
+    }
+
+    function parsePayload(text) {
+      if (!text || text.trim() === "") return undefined;
+      try {
+        return JSON.stringify(JSON.parse(text));
+      } catch {
+        return text;
+      }
+    }
+
+    async function sendRequest(url, method, headers, body, randomizeUA) {
+      try {
+        const finalHeaders = { ...headers };
+        
+        if (randomizeUA) {
+          finalHeaders["User-Agent"] = getRandomUA();
+        }
+
+        // Ajoute une prévention de cache
+        finalHeaders["X-Requested-With"] = "XMLHttpRequest";
+        finalHeaders["Cache-Control"] = "no-cache, no-store, must-revalidate";
+
+        const options = {
+          method,
+          headers: finalHeaders,
+          mode: "cors",
+          cache: "no-store"
+        };
+
+        if (body && method !== "GET" && method !== "HEAD" && method !== "DELETE") {
+          options.body = body;
+        }
+
+        const res = await Promise.race([
+          fetch(url, options),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Timeout")), 10000)
+          )
+        ]);
+
+        return { status: res.status, ok: res.ok };
+      } catch (err) {
+        throw new Error(err.message);
+      }
+    }
+
+    function runWorker(config) {
+      const { url, method, headers, body, total, interval, workerIndex, randomizeUA } = config;
+      let sent = 0;
+
+      const timer = setInterval(async () => {
+        if (!running || stopRequested) {
+          clearInterval(timer);
+          return;
+        }
+
+        if (sent >= total) {
+          clearInterval(timer);
+          return;
+        }
+
+        try {
+          const result = await sendRequest(url, method, headers, body, randomizeUA);
+          stats.sent++;
+          
+          if (result.ok) {
+            stats.success++;
+            appendLog(`Worker ${workerIndex} #${stats.sent} → ${result.status}`, "success");
+          } else {
+            appendLog(`Worker ${workerIndex} #${stats.sent} → ${result.status}`, "warning");
+          }
+        } catch (err) {
+          stats.errors++;
+          stats.sent++;
+          appendLog(`Worker ${workerIndex} → ${err.message}`, "error");
+        }
+
+        updateStats();
+        sent++;
+      }, interval);
+    }
+
+    function startTraffic() {
+      if (running) {
+        appendLog("Le générateur est déjà actif", "warning");
+        return;
+      }
+
+      running = true;
+      stopRequested = false;
+      stats = { sent: 0, success: 0, errors: 0 };
+      startTime = Date.now();
+      updateStats();
+
+      const targetUrl = document.getElementById("targetUrl").value.trim();
+      if (!targetUrl) {
+        appendLog("Erreur: URL cible requise", "error");
+        running = false;
+        return;
+      }
+
+      const method = document.getElementById("method").value;
+      const total = Number(document.getElementById("totalRequests").value || 100);
+      const interval = Number(document.getElementById("interval").value || 200);
+      const concurrency = Number(document.getElementById("concurrency").value || 5);
+      const useProxy = document.getElementById("useProxy").value === "true";
+      const randomizeUA = document.getElementById("randomUA").value === "true";
+      const headers = parseHeaders(document.getElementById("headers").value);
+      const body = parsePayload(document.getElementById("payload").value);
+
+      const finalUrl = buildAnonymousUrl(targetUrl, useProxy);
+
+      appendLog("🚀 Démarrage du trafic anonyme...", "info");
+      appendLog(`URL: ${useProxy ? "[PROXY ANONYME]" : targetUrl}`, "info");
+      appendLog(`Méthode: ${method} | Total: ${total} | Concurrence: ${concurrency}`, "info");
+      appendLog(`User-Agent aléatoire: ${randomizeUA ? "OUI" : "NON"}`, "info");
+      appendLog(`Proxy CORS: ${useProxy ? "OUI" : "NON"}`, "info");
+
+      for (let i = 0; i < concurrency; i++) {
+        let workerTotal = Math.ceil(total / concurrency);
+        if (i === concurrency - 1) {
+          workerTotal = total - (concurrency - 1) * Math.ceil(total / concurrency);
+        }
+
+        runWorker({
+          url: finalUrl,
+          method,
+          headers,
+          body,
+          total: Math.max(1, workerTotal),
+          interval,
+          workerIndex: i + 1,
+          randomizeUA
+        });
+      }
+    }
+
+    function stopTraffic() {
+      if (!running) return;
+      stopRequested = true;
+      running = false;
+      appendLog("⏹️ Arrêt demandé...", "warning");
+      setTimeout(() => {
+        appendLog("✓ Trafic arrêté complètement", "success");
+      }, 500);
+    }
+
+    function clearLogs() {
+      logEl.textContent = "Logs effacés.\n";
+      stats = { sent: 0, success: 0, errors: 0 };
+      startTime = null;
+      updateStats();
+    }
+
+    startBtn.addEventListener("click", startTraffic);
+    stopBtn.addEventListener("click", stopTraffic);
+    clearBtn.addEventListener("click", clearLogs);
+
+    // Message de démarrage
+    appendLog("Outil anonyme chargé. Pas de données externes.", "info");
+    appendLog("Tout fonctionne 100% en local.", "info");
+  </script>
+</body>
+</html>
